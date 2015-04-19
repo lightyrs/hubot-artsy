@@ -11,7 +11,6 @@
 #   hubot get art - Returns a random image from artsy.net.
 #   hubot get artist - Returns a random artist.
 #   hubot art me <query> - Search for piece of art.
-#   artist <some artist> - Returns the details about an artist including an image.
 #
 # Notes:
 #   You need to sign up and get a client id and secret.
@@ -57,7 +56,6 @@ module.exports = (robot) ->
   robot.respond /art me (.*)/i, (msg) ->
     #find the query
     if msg.match[1]
-      console.log "Searching artsy for " + msg.match[1]
 
       getToken msg, (xappToken) ->
         #Get a piece of art
@@ -84,7 +82,6 @@ module.exports = (robot) ->
                   for i in [0..result._embedded.results.length] by 1
                     if typeof result._embedded.results[i] != "undefined"
                       if typeof result._embedded.results[i].type != "undefined"
-                        console.log result._embedded.results[i].type
                         if result._embedded.results[i].type == "Artwork"
                           artwork = result._embedded.results[i]
                           break
@@ -95,7 +92,6 @@ module.exports = (robot) ->
 
                   if artwork
                     if artwork.type == "Artwork"
-                      console.log artwork.title
                       if artwork.title
                         message += artwork.title + "\n"
 
@@ -217,101 +213,6 @@ module.exports = (robot) ->
                   message += links.thumbnail.href + "\n"
 
                 msg.send message
-                return
-
-
-  #
-  # Returns the details about an artist that is mentioned.
-  # TODO: Make this smarter. Right now it only looks for artists with only first and last name.
-  #
-  robot.hear /.*?artist (\w+)\s?(\w+)?/i, (msg) ->
-    unless msg.match[1]?
-      return
-
-    # Whether or not we've tried searching the full name
-    tried_full = false
-    #Get artist details
-    artist_fn = msg.match[1].toLowerCase()
-
-    if msg.match[2]
-      artist_ln = msg.match[2].toLowerCase()
-
-    artist_id = ""
-
-    getToken msg, (xappToken) ->
-
-      if artist_fn and artist_ln
-        tried_full = true
-        artist_id = artist_fn + "-" + artist_ln
-      else if artist_fn
-        artist_id = artist_fn
-
-      api.newRequest()
-          .follow('artist')
-          .withRequestOptions({
-            headers: {
-              'X-Xapp-Token': xappToken,
-              'Accept': 'application/vnd.artsy-v2+json'
-            }
-          })
-          .withTemplateParameters({
-            id: artist_id
-          })
-          .getResource (err, artist) ->
-            if err
-              msg.send "Hiccup."
-              return
-
-            message = ""
-            if artist
-
-              if artist.name
-                message += artist.name + "\n"
-
-              if artist.blurb
-                message += artist.blurb + "\n"
-
-              if artist._links.permalink
-                message += artist._links.permalink.href
-              else if artist._links.thumbnail
-                message += artist._links.thumbnail.href + "\n"
-
-              msg.reply message
-              return
-
-      #Tried full name, now just try the first name
-      if tried_full
-        api.newRequest()
-            .follow('artist')
-            .withRequestOptions({
-              headers: {
-                'X-Xapp-Token': xappToken,
-                'Accept': 'application/vnd.artsy-v2+json'
-              }
-            })
-            .withTemplateParameters({
-              id: artist_fn
-            })
-            .getResource (err, artist) ->
-              if err
-                msg.send "Burp."
-                return
-
-              message = ""
-              if artist
-
-                if artist.name
-                  message += artist.name + "\n"
-
-                if artist.blurb
-                  message += artist.blurb + "\n"
-
-                if artist._links.permalink
-                  message += artist._links.permalink.href
-                else if artist._links.thumbnail
-                  message += artist._links.thumbnail.href + "\n"
-
-                msg.reply message
                 return
 
 
