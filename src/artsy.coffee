@@ -4,15 +4,15 @@
 # Configuration:
 #   HUBOT_ARTSY_CLIENT_ID
 #   HUBOT_ARTSY_CLIENT_SECRET
-#   
+#
 #   Sign up at https://developers.artsy.net
 #
 # Commands:
 #   hubot get art - Returns a random image from artsy.net.
 #   hubot get artist - Returns a random artist.
 #   hubot art me <query> - Search for piece of art.
-#   artists <some artist> - Returns the details about an artist including an image.
-#   
+#   artist <some artist> - Returns the details about an artist including an image.
+#
 # Notes:
 #   You need to sign up and get a client id and secret.
 #
@@ -35,7 +35,7 @@ low  = 1
 high = 23987
 
 module.exports = (robot) ->
-  
+
   #
   # Get a token from Artsy
   #
@@ -53,7 +53,7 @@ module.exports = (robot) ->
 
   #
   # Return a piece of artwork based on a query
-  # 
+  #
   robot.respond /art me (.*)/i, (msg) ->
     #find the query
     if msg.match[1]
@@ -73,12 +73,12 @@ module.exports = (robot) ->
 
             unless body?
               msg.send "The gallery is closed at the moment."
-              return 
-            
+              return
+
             result = JSON.parse(body)
             if result
               message = ""
-              if result._embedded 
+              if result._embedded
 
                   #Search the results for Artwork
                   for i in [0..result._embedded.results.length] by 1
@@ -100,11 +100,11 @@ module.exports = (robot) ->
                         message += artwork.title + "\n"
 
                       links = artwork._links
-                      if links.thumbnail.href
-                        message += links.thumbnail.href + "\n"
 
                       if links.permalink.href
                         message += links.permalink.href
+                      else if links.thumbnail.href
+                        message += links.thumbnail.href + "\n"
 
                       msg.send message
                       return
@@ -116,11 +116,11 @@ module.exports = (robot) ->
                       message += artist.blurb + "\n"
 
                     links = artist._links
-                    if links.thumbnail.href
-                      message += links.thumbnail.href + "\n"
 
                     if links.permalink.href
                       message += links.permalink.href
+                    else if links.thumbnail.href
+                      message += links.thumbnail.href + "\n"
 
                     msg.send message
                     return
@@ -149,12 +149,12 @@ module.exports = (robot) ->
 
           unless body?
             msg.send "The gallery is closed at the moment."
-            return 
-          
+            return
+
           result = JSON.parse(body)
           if result
             message = ""
-            if result._embedded 
+            if result._embedded
                 artwork = result._embedded.artworks[0]
                 if artwork
 
@@ -162,11 +162,11 @@ module.exports = (robot) ->
                     message += artwork.title + "\n"
 
                   links = artwork._links
-                  if links.thumbnail.href
-                    message += links.thumbnail.href + "\n"
 
                   if links.permalink.href
                     message += links.permalink.href
+                  else if links.thumbnail.href
+                    message += links.thumbnail.href + "\n"
 
                   msg.send message
                   return
@@ -193,13 +193,13 @@ module.exports = (robot) ->
 
           unless body?
             msg.send "The gallery is closed at the moment."
-            return 
-          
+            return
+
           result = JSON.parse(body)
           if result
             message = ""
 
-            if result._embedded 
+            if result._embedded
               artist = result._embedded.artists[0]
               if artist
 
@@ -210,15 +210,15 @@ module.exports = (robot) ->
                   message += artist.blurb + "\n"
 
                 links = artist._links
-                if links.thumbnail.href
-                  message += links.thumbnail.href + "\n"
 
                 if links.permalink.href
                   message += links.permalink.href
+                else if links.thumbnail.href
+                  message += links.thumbnail.href + "\n"
 
                 msg.send message
                 return
-        
+
 
   #
   # Returns the details about an artist that is mentioned.
@@ -229,13 +229,13 @@ module.exports = (robot) ->
       return
 
     # Whether or not we've tried searching the full name
-    tried_full = false 
+    tried_full = false
     #Get artist details
     artist_fn = msg.match[1].toLowerCase()
-    
+
     if msg.match[2]
       artist_ln = msg.match[2].toLowerCase()
-    
+
     artist_id = ""
 
     getToken msg, (xappToken) ->
@@ -254,7 +254,7 @@ module.exports = (robot) ->
               'Accept': 'application/vnd.artsy-v2+json'
             }
           })
-          .withTemplateParameters({ 
+          .withTemplateParameters({
             id: artist_id
           })
           .getResource (err, artist) ->
@@ -271,11 +271,10 @@ module.exports = (robot) ->
               if artist.blurb
                 message += artist.blurb + "\n"
 
-              if artist._links.thumbnail
-                message += artist._links.thumbnail.href + "\n"
-
               if artist._links.permalink
                 message += artist._links.permalink.href
+              else if artist._links.thumbnail
+                message += artist._links.thumbnail.href + "\n"
 
               msg.reply message
               return
@@ -290,7 +289,7 @@ module.exports = (robot) ->
                 'Accept': 'application/vnd.artsy-v2+json'
               }
             })
-            .withTemplateParameters({ 
+            .withTemplateParameters({
               id: artist_fn
             })
             .getResource (err, artist) ->
@@ -307,11 +306,10 @@ module.exports = (robot) ->
                 if artist.blurb
                   message += artist.blurb + "\n"
 
-                if artist._links.thumbnail
-                  message += artist._links.thumbnail.href + "\n"
-
                 if artist._links.permalink
                   message += artist._links.permalink.href
+                else if artist._links.thumbnail
+                  message += artist._links.thumbnail.href + "\n"
 
                 msg.reply message
                 return
