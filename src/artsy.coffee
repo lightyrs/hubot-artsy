@@ -97,10 +97,13 @@ module.exports = (robot) ->
 
                       links = artwork._links
 
-                      if links.permalink.href
-                        message += links.permalink.href
-                      else if links.thumbnail.href
-                        message += links.thumbnail.href + "\n"
+                      # if links.permalink.href
+                      #   message += links.permalink.href
+                      # else if links.thumbnail.href
+                      #   message += links.thumbnail.href + "\n"
+
+                      if links.thumbnail.href
+                        message += links.thumbnail.href
 
                       msg.send message
                       return
